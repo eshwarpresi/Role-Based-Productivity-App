@@ -2,25 +2,24 @@ import { useState, useEffect } from 'react';
 import API from '../services/api';
 
 const ConnectionTest = () => {
-  const [status, setStatus] = useState('testing...');
-  const [backendUrl, setBackendUrl] = useState('');
+  const [status, setStatus] = useState('Testing...');
   const [details, setDetails] = useState('');
 
   useEffect(() => {
     const testConnection = async () => {
       try {
-        console.log('🔍 Testing backend connection...');
-        console.log('API baseURL:', API.defaults.baseURL);
-        setBackendUrl(API.defaults.baseURL || 'Not set');
+        console.log('🧪 Starting connection test...');
         
         const response = await API.get('/health');
         console.log('✅ Backend response:', response.data);
-        setStatus(`✅ Connected to Backend`);
-        setDetails(`Message: ${response.data.message || 'No message'}`);
+        
+        setStatus('✅ CONNECTED TO BACKEND');
+        setDetails(JSON.stringify(response.data));
+        
       } catch (error) {
-        console.error('❌ Connection failed:', error);
-        setStatus(`❌ Connection Failed`);
-        setDetails(`Error: ${error.message} - Check browser console for details`);
+        console.error('❌ Connection test failed:', error);
+        setStatus('❌ CONNECTION FAILED');
+        setDetails(`Error: ${error.message} - Check browser console (F12)`);
       }
     };
 
@@ -28,20 +27,29 @@ const ConnectionTest = () => {
   }, []);
 
   return (
-    <div style={{ 
-      padding: '15px', 
-      background: '#f8f9fa', 
-      margin: '10px', 
-      border: '1px solid #dee2e6',
-      borderRadius: '5px',
-      fontSize: '14px'
+    <div style={{
+      padding: '20px',
+      background: '#f8f9fa',
+      border: '2px solid #dee2e6',
+      margin: '10px',
+      borderRadius: '8px',
+      fontFamily: 'monospace'
     }}>
-      <h3 style={{ margin: '0 0 10px 0', color: '#495057' }}>🔌 Backend Connection Test</h3>
-      <p style={{ margin: '5px 0' }}><strong>Backend URL:</strong> {backendUrl}</p>
-      <p style={{ margin: '5px 0' }}><strong>Status:</strong> {status}</p>
-      <p style={{ margin: '5px 0' }}><strong>Details:</strong> {details}</p>
-      <p style={{ margin: '5px 0' }}><strong>Environment:</strong> {import.meta.env.MODE}</p>
-      <p style={{ margin: '5px 0' }}><strong>VITE_API_URL:</strong> {import.meta.env.VITE_API_URL || 'Not set'}</p>
+      <h3 style={{ margin: '0 0 15px 0', color: '#495057' }}>
+        🔌 BACKEND CONNECTION TEST
+      </h3>
+      <div style={{ marginBottom: '8px' }}>
+        <strong>Status:</strong> {status}
+      </div>
+      <div style={{ marginBottom: '8px' }}>
+        <strong>Backend URL:</strong> https://role-based-productivity-app.onrender.com/api
+      </div>
+      <div style={{ marginBottom: '8px' }}>
+        <strong>Details:</strong> {details}
+      </div>
+      <div>
+        <strong>Environment:</strong> {import.meta.env.MODE}
+      </div>
     </div>
   );
 };
