@@ -1,54 +1,37 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 
-// ⭐ ALLOW EVERYTHING - NO CORS RESTRICTIONS
+// ⭐ CORS - ALLOW EVERYTHING
 app.use(cors({
   origin: "*",
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"]
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
-
-// Handle preflight requests
-app.options('*', cors());
 
 app.use(express.json());
 
-// Add request logging
-app.use((req, res, next) => {
-  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
-  next();
-});
-
-// ⭐ HEALTH CHECK - SIMPLE
+// ⭐ SIMPLE HEALTH CHECK
 app.get('/api/health', (req, res) => {
-  console.log('✅ Health check called');
+  console.log('✅ Health check called from:', req.headers.origin);
   res.json({ 
     message: 'BACKEND IS WORKING!',
     status: 'active',
-    timestamp: new Date().toISOString(),
-    origin: req.headers.origin
+    timestamp: new Date().toISOString()
   });
 });
 
-// ⭐ SIMPLE LOGIN - NO DATABASE
+// ⭐ SIMPLE LOGIN
 app.post('/api/auth/login', (req, res) => {
   console.log('🔑 Login attempt:', req.body);
   
   const { username, password } = req.body;
   
-  // Demo credentials
   if (username === 'admin' && password === 'admin123') {
     return res.json({
       token: 'demo-jwt-token-12345',
-      user: { 
-        id: 1, 
-        username: 'admin', 
-        role: 'admin' 
-      },
+      user: { id: 1, username: 'admin', role: 'admin' },
       message: 'Login successful!'
     });
   } else {
@@ -60,33 +43,11 @@ app.post('/api/auth/login', (req, res) => {
 
 // ⭐ TEST ENDPOINT
 app.get('/api/test', (req, res) => {
-  res.json({ 
-    message: 'Test endpoint working!',
-    backend: 'Render',
-    origin: req.headers.origin
-  });
-});
-
-// ⭐ AUTH TEST
-app.get('/api/auth/test', (req, res) => {
-  res.json({ 
-    message: 'Auth test working!',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Handle unknown routes
-app.use('*', (req, res) => {
-  res.status(404).json({ 
-    message: 'Route not found',
-    path: req.originalUrl
-  });
+  res.json({ message: 'Test endpoint working!' });
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 SERVER STARTED on port ${PORT}`);
-  console.log(`✅ Health: https://role-based-productivity-app.onrender.com/api/health`);
-  console.log(`🔑 Demo: admin / admin123`);
-  console.log(`🌍 CORS: All origins allowed`);
+  console.log(`🚀 FRESH BACKEND running on port ${PORT}`);
+  console.log(`✅ CORS: All origins allowed`);
 });
