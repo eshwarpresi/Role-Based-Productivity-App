@@ -1,13 +1,17 @@
 import axios from "axios";
 
+// Use environment variable or fallback to Render URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://role-based-productivity-app.onrender.com/api";
+
 const API = axios.create({
-  baseURL: import.meta.env.PROD
-    ? "https://role-based-productivity-app.onrender.com/api"   // Render backend
-    : "http://localhost:5000/api",                             // Local backend
+  baseURL: API_BASE_URL,
   timeout: 15000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-// Attach token
+// Attach token to requests
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -16,16 +20,16 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401
+// Handle responses
 API.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
     }
-    return Promise.reject(err);
+    return Promise.reject(error);
   }
 );
 
