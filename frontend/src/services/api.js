@@ -1,13 +1,9 @@
 import axios from "axios";
 
-// Hardcode the URL temporarily to eliminate env variable issues
+// Use the direct Render URL - no environment checks
 const API_BASE_URL = "https://role-based-productivity-app.onrender.com/api";
 
-console.log('🚀 API Configuration:', {
-  baseURL: API_BASE_URL,
-  environment: import.meta.env.MODE,
-  viteApiUrl: import.meta.env.VITE_API_URL
-});
+console.log('🚀 API Base URL:', API_BASE_URL);
 
 const API = axios.create({
   baseURL: API_BASE_URL,
@@ -23,7 +19,7 @@ API.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  console.log(`📤 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+  console.log(`📤 Making API request to: ${config.url}`);
   return config;
 });
 
@@ -34,19 +30,7 @@ API.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error(`❌ API Error:`, {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      message: error.message,
-      responseData: error.response?.data
-    });
-    
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
-    }
+    console.error(`❌ API Error:`, error.response?.data || error.message);
     return Promise.reject(error);
   }
 );
