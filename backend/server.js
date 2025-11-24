@@ -7,13 +7,13 @@ const taskRoutes = require("./routes/tasks");
 
 const app = express();
 
-// CORS
+// ✅ FIXED CORS — Added your real Vercel domain
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://role-based-productivity-frontend.vercel.app",
-      "https://role-based-productivity-app.onrender.com"
+      "https://role-based-productivity-app.vercel.app",  // ⭐ Your Real Vercel Frontend
+      /\.vercel\.app$/,                                   // ⭐ Allow any Vercel preview deployments
     ],
     credentials: true,
   })
@@ -40,10 +40,7 @@ app.use("/api/*", (req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-// ❌ NO frontend serving, NO app.get("*") (This was breaking the API)
-
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
