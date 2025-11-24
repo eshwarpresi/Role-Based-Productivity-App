@@ -1,46 +1,54 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// CORS for local + Render frontend
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3000',
+      'https://role-based-productivity-app.onrender.com'
+    ],
+    credentials: true
+  })
+);
+
 app.use(express.json());
 
-// Routes
+// API ROUTES
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// Health check
+// Health Check
 app.get('/api/health', (req, res) => {
-  res.json({ message: 'Server is running!' });
+  res.json({ status: "ok", message: "Backend is running!" });
 });
 
-// Simple test route
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Test route working!' });
+// -------------------------------
+// SERVE FRONTEND (IMPORTANT)
+// -------------------------------
+const distPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(distPath));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
-// Error handling middleware
+// Error handling
 app.use((err, req, res, next) => {
   console.error('Server error:', err.stack);
   res.status(500).json({ message: 'Something went wrong!' });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Route not found' });
 });
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
-  console.log(`✅ Environment: ${process.env.NODE_ENV}`);
-  console.log(`✅ Health check: http://localhost:${PORT}/api/health`);
-  console.log(`✅ Test route: http://localhost:${PORT}/api/test`);
+  console.log(`🔗 API Health: https://role-based-productivity-app.onrender.com/api/health`);
 });
