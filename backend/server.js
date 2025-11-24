@@ -7,21 +7,22 @@ const taskRoutes = require("./routes/tasks");
 
 const app = express();
 
-// ✅ FIXED CORS — Added your real Vercel domain
+// ⭐ Correct CORS settings — required for Vercel frontend
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://role-based-productivity-app.vercel.app",  // ⭐ Your Real Vercel Frontend
-      /\.vercel\.app$/,                                   // ⭐ Allow any Vercel preview deployments
+      "https://role-based-productivity-app.vercel.app",
+      /\.vercel\.app$/,
     ],
     credentials: true,
   })
 );
 
+// ⭐ Required to parse JSON bodies
 app.use(express.json());
 
-// ⭐ API ROUTES MUST COME FIRST ⭐
+// ⭐ Register API routes first
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 
@@ -35,7 +36,7 @@ app.get("/api/auth/test", (req, res) => {
   res.json({ message: "Auth test working" });
 });
 
-// ⭐ Only 404 for API paths
+// Handle unknown API paths
 app.use("/api/*", (req, res) => {
   res.status(404).json({ message: "Route not found" });
 });

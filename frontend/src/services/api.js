@@ -1,7 +1,5 @@
 import axios from "axios";
 
-// ❗ No VITE_BACKEND_URL needed unless you want it.
-// Vercel → import.meta.env.PROD === true
 const API = axios.create({
   baseURL: import.meta.env.PROD
     ? "https://role-based-productivity-app.onrender.com/api"   // Render backend
