@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import ConnectionTest from './components/ConnectionTest'; // Add this import
 
 function App() {
   return (
@@ -12,6 +13,8 @@ function App() {
       <Router>
         <div className="min-h-screen bg-gray-50">
           <Navbar />
+          {/* Add ConnectionTest temporarily - you can remove it later */}
+          <ConnectionTest />
           <main>
             <Routes>
               <Route path="/login" element={<Login />} />
