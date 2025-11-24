@@ -1,30 +1,49 @@
-import axios from "axios";
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
 
-const API = axios.create({
-  baseURL: import.meta.env.PROD
-    ? "https://role-based-productivity-app.onrender.com/api"
-    : "http://localhost:5000/api",
-  timeout: 15000,
-});
+const authRoutes = require("./routes/auth");
+const taskRoutes = require("./routes/tasks");
 
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+const app = express();
 
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  }
+// CORS
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://role-based-productivity-frontend.vercel.app",
+      "https://role-based-productivity-app.onrender.com"
+    ],
+    credentials: true,
+  })
 );
 
-export default API;
+app.use(express.json());
+
+// ⭐ API ROUTES MUST COME FIRST ⭐
+app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
+
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({ message: "Server is running" });
+});
+
+// Test endpoint
+app.get("/api/auth/test", (req, res) => {
+  res.json({ message: "Auth test working" });
+});
+
+// ⭐ Only 404 for API paths
+app.use("/api/*", (req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+// ❌ NO frontend serving, NO app.get("*") (This was breaking the API)
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
+});
