@@ -12,43 +12,67 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://role-based-productivity-app.vercel.app",
-    "https://role-based-productivity-app-git-main-eshwarpresi.vercel.app",
     "https://role-based-productivity-app-*.vercel.app",
     /\.vercel\.app$/
   ],
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"]
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"]
 }));
 
-// Handle preflight requests properly
+// Handle preflight requests
 app.options("*", cors());
 
 app.use(express.json());
+
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.originalUrl} - Origin: ${req.headers.origin}`);
+  next();
+});
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 
-// Health check
+// Health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ 
-    message: "Server is running",
+    message: "Server is running with CORS",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV
   });
 });
 
-// Test endpoint with CORS headers
+// Simple test endpoint
 app.get("/api/test", (req, res) => {
   res.json({ 
-    message: "Backend is working with CORS!",
-    origin: req.headers.origin || "No origin header"
+    message: "API is working!",
+    origin: req.headers.origin,
+    backend: "Render"
+  });
+});
+
+// Handle unknown API routes
+app.use("/api/*", (req, res) => {
+  res.status(404).json({ 
+    message: "API route not found",
+    path: req.originalUrl
+  });
+});
+
+// Root endpoint
+app.get("/", (req, res) => {
+  res.json({ 
+    message: "Task Manager Backend API",
+    status: "running",
+    documentation: "Use /api endpoints"
   });
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Backend running on port ${PORT}`);
+  console.log(`✅ Backend server running on port ${PORT}`);
   console.log(`🌍 CORS enabled for Vercel deployment`);
+  console.log(`🔄 Environment: ${process.env.NODE_ENV}`);
 });
