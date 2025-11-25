@@ -2,86 +2,51 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
+// Import routes (REAL backend)
+const authRoutes = require('./routes/auth');
+const taskRoutes = require('./routes/tasks');
+
 const app = express();
 
-// CORS - ALLOW EVERYTHING
+// ===== CORS For Deployment =====
 app.use(cors({
-  origin: "*",
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+  origin: "*", // Allow all origins (or use your frontend URL only)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
 }));
 
+// Body parser
 app.use(express.json());
 
-// Health check
+// ===== Health Check =====
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    message: 'BACKEND IS WORKING!',
+  res.json({
+    message: 'Server is running!',
     status: 'active',
-    timestamp: new Date().toISOString()
+    ts: new Date().toISOString()
   });
 });
 
-// SIMPLE LOGIN ENDPOINT (TEMPORARY)
-app.post('/api/auth/login', (req, res) => {
-  console.log('Login attempt:', req.body);
-  
-  const { username, password } = req.body;
-  
-  // Demo login - works for any user
-  if (username && password) {
-    return res.json({
-      token: 'demo-jwt-token-12345',
-      user: { 
-        id: 1, 
-        username: username, 
-        role: username === 'admin' ? 'admin' : 'user' 
-      },
-      message: 'Login successful!'
-    });
-  } else {
-    return res.status(401).json({ 
-      message: 'Username and password required' 
-    });
-  }
+// ===== Real Routes =====
+app.use('/api/auth', authRoutes);
+app.use('/api/tasks', taskRoutes);
+
+// ===== 404 Handler =====
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
 });
 
-// SIMPLE REGISTER ENDPOINT (TEMPORARY)
-app.post('/api/auth/register', (req, res) => {
-  console.log('Register attempt:', req.body);
-  
-  const { username, password } = req.body;
-  
-  if (username && password) {
-    return res.status(201).json({
-      token: 'demo-jwt-token-12345',
-      user: { 
-        id: 2, 
-        username: username, 
-        role: 'user' 
-      },
-      message: 'Registration successful!'
-    });
-  } else {
-    return res.status(400).json({ 
-      message: 'Username and password required' 
-    });
-  }
+// ===== Global Error Handler =====
+app.use((err, req, res, next) => {
+  console.error("🔥 SERVER ERROR:", err);
+  res.status(500).json({ message: "Something went wrong on the server!" });
 });
 
-// Test auth endpoint
-app.get('/api/auth/test', (req, res) => {
-  res.json({ message: 'Auth test working!' });
-});
-
-// Test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Test endpoint working!' });
-});
-
+// ===== Server Start =====
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 SIMPLE BACKEND running on port ${PORT}`);
-  console.log(`✅ CORS: All origins allowed`);
-  console.log(`🔑 Login: Any username/password will work`);
+  console.log(`🎉 Server running on port ${PORT}`);
+  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🔑 Auth: /api/auth/login & /api/auth/register`);
+  console.log(`📝 Tasks: /api/tasks`);
 });

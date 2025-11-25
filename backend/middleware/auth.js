@@ -2,11 +2,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 
 const protect = (req, res, next) => {
-  let token;
-
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ message: 'Not authorized, no token' });
@@ -14,25 +10,31 @@ const protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
-    
-    db.get('SELECT id, username, role FROM users WHERE id = ?', [decoded.id], (err, user) => {
-      if (err || !user) {
-        return res.status(401).json({ message: 'Not authorized, user not found' });
+
+    // Fetch user from DB
+    db.get(
+      'SELECT id, username, role FROM users WHERE id = ?',
+      [decoded.id],
+      (err, user) => {
+        if (err || !user) {
+          return res.status(401).json({ message: 'Not authorized, user not found' });
+        }
+
+        req.user = user; // attach user data
+        next();
       }
-      
-      req.user = user;
-      next();
-    });
-  } catch (error) {
-    return res.status(401).json({ message: 'Not authorized, token failed' });
+    );
+
+  } catch (err) {
+    return res.status(401).json({ message: 'Token is not valid' });
   }
 };
 
 const admin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  if (req.user?.role === 'admin') {
     next();
   } else {
-    res.status(403).json({ message: 'Admin access required' });
+    return res.status(403).json({ message: 'Admin access required' });
   }
 };
 

@@ -4,8 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import ConnectionTest from './components/ConnectionTest'; // Add this import
+import Dashboard from './pages/Dashboard'; 
 
 function App() {
   return (
