@@ -2,21 +2,14 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-// Detect Render environment
-const isRender = !!process.env.RENDER_EXTERNAL_HOSTNAME;
-
-// Use Render persistent disk
-const dbFolder = isRender ? '/var/data' : path.join(__dirname, '..');
-const dbPath = path.join(dbFolder, 'database.sqlite');
-
-// Ensure the folder exists
-if (!fs.existsSync(dbFolder)) {
-  fs.mkdirSync(dbFolder, { recursive: true });
-}
+// Use persistent storage on Render
+const dbPath = process.env.RENDER
+  ? '/var/data/database.sqlite'
+  : path.join(__dirname, '..', 'database.sqlite');
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('❌ Error opening database:', err.message);
+    console.error('Error opening database:', err.message);
   } else {
     console.log('✅ Connected to SQLite database at', dbPath);
   }
